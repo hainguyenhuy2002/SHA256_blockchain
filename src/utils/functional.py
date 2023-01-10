@@ -9,32 +9,6 @@ def sigma(i,j,l):
     return k
 
 
-def NOT(j):
-    k = []
-    for i in j:
-        if i == 1:
-            k.append(0)
-        if i == 0:
-            k.append(1)
-    return k
-
-
-def AND(i, j):
-    k = []
-    for ia, ja in zip(i, j):
-        a = ia & ja
-        k.append(a)
-    return k
-
-
-def XOR(i, j): 
-    k = []
-    for ia, ja in zip(i, j):
-        a = ia ^ ja
-        k.append(a)
-    return k
-
-
 def add(i, j):
     length = len(i)
     sums = list(range(length))
@@ -45,21 +19,44 @@ def add(i, j):
     return sums
 
 
-def maj(i,j,k): return max([i,j,], key=[i,j,k].count)
-
-def rotr(x, n): return x[-n:] + x[:-n]
-
-def shr(x, n): return n * [0] + x[:-n]
-
-def isTrue(x): return x == 1
-
-def if_(i, y, z): return y if isTrue(i) else z
-
-def not_(i): return if_(i, 0, 1)
-
-def xor(i, j): return if_(i, not_(j), j)
-
-def sigmaa(i, j, l): return xor(i, xor(j, l))
+def NOT(x: list):
+    k = []
+    for i in x:
+        k.append(1 - i)
+    return k
 
 
-def SIGMA(x: )
+def AND(x: list, y: list):
+    k = []
+    for ia, ja in zip(x, y):
+        a = ia & ja
+        k.append(a)
+    return k
+
+
+def XOR(x: list, y: list): 
+    k = []
+    for ia, ja in zip(x, y):
+        a = ia ^ ja
+        k.append(a)
+    return k
+
+
+def ROTR(x: list, n: int): 
+    return x[-n:] + x[:-n]
+
+
+def SHR(x: list, n: int): 
+    return [0 for _ in range(n)] + x[:-n]
+
+
+def SIGMA(x: list, r1, r2, s3):
+    return XOR(XOR(ROTR(x, r1), ROTR(x, r2)), SHR(x, s3))
+
+
+def MAJ(x: list, y: list, z: list): 
+    res = []
+    for _x, _y, _z in zip(x, y, z):
+        k = (_x & _y) ^ (_x & _z) ^ (_y & _z)
+        res.append(k)
+    return res
