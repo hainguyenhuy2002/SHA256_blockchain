@@ -6,6 +6,10 @@ def sigma(i,j,l):
         k.append(b)
     return k
 
+def sigmaa(i, j, l): 
+    return i ^ (j ^ l)
+
+def maj(i,j,k): return max([i,j,], key=[i,j,k].count)
 
 def add(i, j):
     length = len(i)
@@ -58,3 +62,4 @@ def MAJ(x: list, y: list, z: list):
         k = (_x & _y) ^ (_x & _z) ^ (_y & _z)
         res.append(k)
     return res
+
