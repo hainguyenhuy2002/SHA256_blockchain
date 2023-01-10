@@ -30,6 +30,10 @@ def int2bin(value, num_bits=32):
         raise ValueError("type of value must be int, not" + str(type(value)))
 
 
+def str2list(bin):
+    return [int(i) for i in bin]
+
+
 def check(x: Union[int, str]):
     x = int2bin(x) if isinstance(x, int) else x
     assert len(x) == 32
