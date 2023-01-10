@@ -6,8 +6,6 @@ def sigma(i,j,l):
         k.append(b)
     return k
 
-# def sigmaa(i, j, l):
-#     return XOR(i, XOR(j, l))
 
 def NOT(j):
     k = []
@@ -18,6 +16,7 @@ def NOT(j):
             k.append(1)
     return k
 
+
 def AND(i, j):
     k = []
     for ia, ja in zip(i, j):
@@ -25,12 +24,14 @@ def AND(i, j):
         k.append(a)
     return k
 
+
 def XOR(i, j): 
     k = []
     for ia, ja in zip(i, j):
         a = ia ^ ja
         k.append(a)
     return k
+
 
 def add(i, j):
     length = len(i)
@@ -40,6 +41,7 @@ def add(i, j):
         sums[x] = sigmaa(i[x], j[x], c)
         c = maj(i[x], j[x], c)
     return sums
+
 
 def maj(i,j,k): return max([i,j,], key=[i,j,k].count)
 
