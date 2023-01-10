@@ -1,5 +1,3 @@
-from typing
-
 def sigma(i,j,l):
     k = []
     for ia, ja, la in zip(i, j, l):
@@ -17,6 +15,22 @@ def add(i, j):
         sums[x] = sigmaa(i[x], j[x], c)
         c = maj(i[x], j[x], c)
     return sums
+
+
+def ADD(x: list, y: list):
+    assert len(x) == len(y)
+    sum = []
+    mem = 0
+    for i in range(len(x) - 1, -1, -1):
+        _x, _y = x[i], y[i]
+        s = _x + _y + mem
+        if s > 1:
+            mem = 1
+            s = s % 2
+        else:
+            mem = 0
+        sum.append(s)
+    return sum[::-1]
 
 
 def NOT(x: list):

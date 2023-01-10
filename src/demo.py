@@ -1,5 +1,8 @@
 from stdio import inputs, wait_for, Action, Symbol, set_property
 from typing import Union
+import math
+from utils.functional import SIGMA, ADD 
+from functools import partial
 
 
 __space__ = 7
@@ -14,10 +17,13 @@ def get_space():
     return __space__
 
 
-def show(name, *val, line_up=0):
+def show(name, *val, line_up=0, space_right=False):
     space = max(get_space(), len(name))
     set_property(Action.LINE_UP * line_up)
-    name = Action.LINE_RIGHT * (space - len(name)) + name
+    if space_right is False:
+        name = Action.LINE_RIGHT * (space - len(name)) + name
+    else:
+        name += ' ' * (space - len(name))
     print(Action.LINE_CLEAR + name, *val, end='\n' * max(1, line_up))    
 
 
@@ -32,6 +38,10 @@ def int2bin(value, num_bits=32):
 
 def str2list(bin):
     return [int(i) for i in bin]
+
+
+def list2str(_list):
+    return "".join([str(l) for l in _list])
 
 
 def check(x: Union[int, str]):
@@ -160,44 +170,56 @@ def maj_demo(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
     return res
 
 
-def hash_demo():
+def input_msg():
     print("| Message:")
     msg = input("Input your message: ")
     msg_bytes = [ord(c) for c in msg]
-    print      ("Bytes:            ", msg_bytes)
+    print      ("Bytes:             ", msg_bytes)
     msg = "".join([int2bin(i, 8) for i in msg_bytes])
-    print      ("Message:          ", msg)
+    print      ("Message:           ", msg)
     print()
+    return msg
 
+
+def padding(msg):
     wait_for()
 
-    if len(msg) < 448:
-        set_space(0)
+    def show_msg(old_bits=None):
+        bits = lambda num: f"{num} bits" if num > 1 else f"{num} bit"
+        bits_per_line = 64
         
-        def show_msg(first=False, old_bits=None):
-            first = int(not first)
-            bits = lambda num: f"{num} bits" if num > 1 else f"{num} bit"
-            
-            if old_bits is None:
-                __m = f"({bits(len(msg))})"
+        if old_bits is None:
+            old_bits = 0
+            __m = f"({bits(len(msg))})"
+        else:
+            __m = f"({bits(old_bits)} -> {bits(len(msg))})"
+
+        num_old_lines = math.ceil(old_bits / bits_per_line)
+        set_property(Action.LINE_UP * (num_old_lines + 1))
+        print("| Padding:", __m)
+
+        lines = math.ceil(len(msg) / bits_per_line)
+        for i in range(lines):
+            line = msg[i * bits_per_line : min(len(msg), (i + 1) * bits_per_line)]
+            if i == 0:
+                print("Message:        ", line)
             else:
-                __m = f"({bits(old_bits)} -> {bits(len(msg))})"
+                print("                ", line)
 
-            show("| Padding:", __m, line_up=2 * first)
-            show("Message:", msg, line_up=1 * first)
+    if len(msg) < 448:    
+        print()
+        show_msg()
 
-        show_msg(True)
         wait_for()
-
         msg += '1'
         show_msg(old_bits=len(msg) - 1)
-        wait_for()
 
+        wait_for()
         __len = len(msg)
         msg += '0' * (448 - len(msg))
         show_msg(old_bits=__len)
-        wait_for()
 
+        wait_for()
         msg += int2bin(__len, 64)
         show_msg(old_bits=448)
 
@@ -206,14 +228,63 @@ def hash_demo():
     else:
         pass
 
-    print("| Message block:", msg)
-    print()
+    wait_for()
+    bits_per_line = 64
+    lines = math.ceil(len(msg) / bits_per_line)
+    for i in range(lines):
+        line = msg[i * bits_per_line : min(len(msg), (i + 1) * bits_per_line)]
+        if i == 0:
+            print("\n| Message block:", line)
+        else:
+            print("                ", line)
+    return msg
 
-    print("| Message scheduler:")
+
+def message_scheduler(msg):
+    wait_for()
+    print("\n| Message scheduler:")
     set_space(3)
+    ws = [msg[i * 32: (i + 1) * 32] for i in range(16)]
+
+    def show_ws(n_last, use_postfix=True, line_up=0, **kwargs):
+        set_property(Action.LINE_UP * line_up)
+        show_r = partial(show, space_right=True)
+
+        for idx, w in enumerate(ws[-n_last:]):
+            idx_ = idx + len(ws) - n_last
+            if use_postfix is False:
+                show_r(f"W{idx_}", w)
+            elif idx == 0:
+                show_r(f"W{idx_}", w, "->       ", w)
+            elif idx == 1:
+                show_r(f"W{idx_}", w, "-> sigma0", kwargs['sigma0'])
+            elif idx == 9:
+                show_r(f"W{idx_}", w, "->       ", w)
+            elif idx == 14:
+                show_r(f"W{idx_}", w, "-> sigma1", kwargs['sigma1'])
+            elif idx == 16:
+                show_r(f"W{idx_}", w, "= sigma1(t-2) + (t-7) + sigma0(t-15) + (t-16)")
+            else:
+                show_r(f"W{idx_}", w)
+
+    show_ws(16, False)
+
+    for i in range(16, 64):
+        wait_for()
+        sigma0 = SIGMA(str2list(ws[i - 15]), 7, 18, 3)
+        sigma1 = SIGMA(str2list(ws[i - 2]), 17, 19, 10)
+        w = ADD(sigma1, str2list(ws[i-7]))
+        w = ADD(w, sigma0)
+        w = ADD(w, str2list(ws[i-16]))
+        ws.append(list2str(w))
+
+        show_ws(17, line_up=min(17, i), sigma0=list2str(sigma0), sigma1=list2str(sigma1))
 
 
-
+def hash_demo():
+    msg = input_msg()
+    msg = padding(msg)
+    ws = message_scheduler(msg)
 
 if __name__ == "__main__":
     # shr(space=6, r=16)
@@ -231,5 +302,4 @@ if __name__ == "__main__":
     # )
 
     hash_demo()
-
-    # sigma 17 19 10
+    # print(list2str(ADD(str2list("0110"), str2list("1011"))))
