@@ -280,11 +280,17 @@ def message_scheduler(msg):
 
         show_ws(17, line_up=min(17, i), sigma0=list2str(sigma0), sigma1=list2str(sigma1))
 
+    wait_for()
+    show_ws(17, False, line_up=17)
+
+    return ws
+
 
 def hash_demo():
     msg = input_msg()
     msg = padding(msg)
     ws = message_scheduler(msg)
+
 
 if __name__ == "__main__":
     # shr(space=6, r=16)
