@@ -128,6 +128,7 @@ def ch(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
         show("Y", y, postfix[0], line_up=4)
         show("Z", z, postfix[1], line_up=3)
         show("", "".join(res), line_up=1)
+    return res
         
 
 def maj(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
@@ -152,6 +153,7 @@ def maj(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
         res[i] = str((_x & _y) ^ (_x & _z) ^ (_y & _z))
 
         show("", "".join(res), line_up=1)
+    return res
 
 
 if __name__ == "__main__":
