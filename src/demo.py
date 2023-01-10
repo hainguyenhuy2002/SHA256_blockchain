@@ -36,7 +36,7 @@ def check(x: Union[int, str]):
     return x
 
 
-def shr(x: Union[int, str]="11111111000000001111111100000000", r=32, show_first=True, line_up=1, space=None, postfix=""):
+def shr_demo(x: Union[int, str]="11111111000000001111111100000000", r=32, show_first=True, line_up=1, space=None, postfix=""):
     x = check(x)
     shift = x[::]
 
@@ -54,7 +54,7 @@ def shr(x: Union[int, str]="11111111000000001111111100000000", r=32, show_first=
     return shift
 
 
-def rotr(x: Union[int, str]="11111111000000001111111100000000", r=32, show_first=True, line_up=1, space=None, postfix=""):
+def rotr_demo(x: Union[int, str]="11111111000000001111111100000000", r=32, show_first=True, line_up=1, space=None, postfix=""):
     x = check(x)
     shift = x[::]
 
@@ -72,7 +72,7 @@ def rotr(x: Union[int, str]="11111111000000001111111100000000", r=32, show_first
     return shift
     
 
-def sigma0(x: Union[int, str]="00000000000000000011111111111111", r1=7, r2=18, r3=3):
+def sigma_demo(x: Union[int, str]="00000000000000000011111111111111", r1=7, r2=18, r3=3):
     x = check(x)
 
     set_space(9)
@@ -83,9 +83,9 @@ def sigma0(x: Union[int, str]="00000000000000000011111111111111", r1=7, r2=18, r
     show("", "--------------------------------")
     show("sigma0(x)")
 
-    rotr_1  = rotr(x, r=r1, show_first=False, line_up=5)
-    rotr_2  = rotr(x, r=r2, show_first=False, line_up=4, postfix="XOR")
-    shr_3   = shr( x, r=r3, show_first=False, line_up=3, postfix='XOR')
+    rotr_1  = rotr_demo(x, r=r1, show_first=False, line_up=5)
+    rotr_2  = rotr_demo(x, r=r2, show_first=False, line_up=4, postfix="XOR")
+    shr_3   = shr_demo( x, r=r3, show_first=False, line_up=3, postfix='XOR')
 
     res = [' ' for _ in range(32)]
     for i in range(31, -1, -1):
@@ -95,7 +95,7 @@ def sigma0(x: Union[int, str]="00000000000000000011111111111111", r1=7, r2=18, r
         show("sigma0(x)", "".join(res))
 
 
-def ch(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
+def ch_demo(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
     x = check(x)
     y = check(y)
     z = check(z)
@@ -131,7 +131,7 @@ def ch(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
     return res
         
 
-def maj(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
+def maj_demo(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
     x = check(x)
     y = check(y)
     z = check(z)
@@ -156,7 +156,7 @@ def maj(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
     return res
 
 
-def hash():
+def hash_demo():
     print("| Message:")
     msg = input("Input your message: ")
     msg_bytes = [ord(c) for c in msg]
@@ -194,15 +194,19 @@ def hash():
         show_msg(old_bits=__len)
         wait_for()
 
-
-
+        msg += int2bin(__len, 64)
+        show_msg(old_bits=448)
 
     elif len(msg) <= 512:
         pass
     else:
         pass
 
+    print("| Message block:", msg)
+    print()
 
+    print("| Message scheduler:")
+    set_space(3)
 
 
 
@@ -222,4 +226,6 @@ if __name__ == "__main__":
     #     z="00101000000101010111111110101111"
     # )
 
-    hash()
+    hash_demo()
+
+    # sigma 17 19 10
