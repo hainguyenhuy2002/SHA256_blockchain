@@ -11,8 +11,8 @@ def sha256(message):
         for _ in range(48):
             w.append(32 * [0])
         for i in range(16, 64):
-            s0 = sigma(rotr(w[i-15], 7), rotr(w[i-15], 18), shr(w[i-15], 3) ) 
-            s1 = sigma(rotr(w[i-2], 17), rotr(w[i-2], 19), shr(w[i-2], 10))
+            s0 = sigma(ROTR(w[i-15], 7), ROTR(w[i-15], 18), SHR(w[i-15], 3) ) 
+            s1 = sigma(ROTR(w[i-2], 17), ROTR(w[i-2], 19), SHR(w[i-2], 10))
             w[i] = add(add(add(w[i-16], s0), w[i-7]), s1)
         a = h0
         b = h1
@@ -23,10 +23,10 @@ def sha256(message):
         g = h6
         h = h7
         for j in range(64):
-            S1 = sigma(rotr(e, 6), rotr(e, 11), rotr(e, 25) )
+            S1 = sigma(ROTR(e, 6), ROTR(e, 11), ROTR(e, 25) )
             ch = XOR(AND(e, f), AND(NOT(e), g))
             temp1 = add(add(add(add(h, S1), ch), k[j]), w[j])
-            S0 = sigma(rotr(a, 2), rotr(a, 13), rotr(a, 22))
+            S0 = sigma(ROTR(a, 2), ROTR(a, 13), ROTR(a, 22))
             m = sigma(AND(a, b), AND(a, c), AND(b, c))
             temp2 = add(S0, m)
             h = g
