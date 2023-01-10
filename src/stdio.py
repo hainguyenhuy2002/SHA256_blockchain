@@ -9,6 +9,13 @@ class Action:
     LINE_CLEAR = '\x1b[2K'
 
 
+class Symbol:
+    TRIANGLE_RIGHT = chr(16)
+    TRIANGLE_LEFT = chr(17)
+    TRIANGLE_UP = chr(30)
+    TRIANGLE_DOWN = chr(31)
+    
+
 class Color:
     BLACK = "\033[0;30m"
     RED = "\033[0;31m"
