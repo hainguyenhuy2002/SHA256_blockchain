@@ -21,10 +21,10 @@ def show(name, *val, line_up=0):
     print(Action.LINE_CLEAR + name, *val, end='\n' * max(1, line_up))    
 
 
-def int2bin(value):
+def int2bin(value, num_bits=32):
     if isinstance(value, int):
         b = bin(value).replace('0b', "")
-        b = '0' * (32 - len(b)) + b
+        b = '0' * (num_bits - len(b)) + b
         return b
     else:
         raise ValueError("type of value must be int, not" + str(type(value)))
@@ -112,7 +112,7 @@ def ch(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
     cursor  = [' ' for _ in range(33)]
 
     for i in range(31, -1, -1):
-        wait_for('enter')
+        wait_for()
         
         if x[i] == '1':
             res[i] = y[i]
@@ -156,6 +156,57 @@ def maj(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
     return res
 
 
+def hash():
+    print("| Message:")
+    msg = input("Input your message: ")
+    msg_bytes = [ord(c) for c in msg]
+    print      ("Bytes:            ", msg_bytes)
+    msg = "".join([int2bin(i, 8) for i in msg_bytes])
+    print      ("Message:          ", msg)
+    print()
+
+    wait_for()
+
+    if len(msg) < 448:
+        set_space(0)
+        
+        def show_msg(first=False, old_bits=None):
+            first = int(not first)
+            bits = lambda num: f"{num} bits" if num > 1 else f"{num} bit"
+            
+            if old_bits is None:
+                __m = f"({bits(len(msg))})"
+            else:
+                __m = f"({bits(old_bits)} -> {bits(len(msg))})"
+
+            show("| Padding:", __m, line_up=2 * first)
+            show("Message:", msg, line_up=1 * first)
+
+        show_msg(True)
+        wait_for()
+
+        msg += '1'
+        show_msg(old_bits=len(msg) - 1)
+        wait_for()
+
+        __len = len(msg)
+        msg += '0' * (448 - len(msg))
+        show_msg(old_bits=__len)
+        wait_for()
+
+
+
+
+    elif len(msg) <= 512:
+        pass
+    else:
+        pass
+
+
+
+
+
+
 if __name__ == "__main__":
     # shr(space=6, r=16)
     # rotr(space=7, r=4)
@@ -165,8 +216,10 @@ if __name__ == "__main__":
     #     y="00000000000000001111111111111111",
     #     z="11111111111111110000000000000000"
     # )
-    maj(
-        x="01010000000100101010101000001010",
-        y="00100010010100010101000010100001",
-        z="00101000000101010111111110101111"
-    )
+    # maj(
+    #     x="01010000000100101010101000001010",
+    #     y="00100010010100010101000010100001",
+    #     z="00101000000101010111111110101111"
+    # )
+
+    hash()
