@@ -16,6 +16,10 @@ def add(i, j):
         c = maj(i[x], j[x], c)
     return sums
 
+def sigmaa(i, j, l):
+    return i ^ (j^ l)
+
+def maj(i,j,k): return max([i,j,], key=[i,j,k].count)
 
 def ADD(x: list, y: list):
     assert len(x) == len(y)
