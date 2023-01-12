@@ -326,7 +326,7 @@ def message_scheduler(msg):
 
 def compression(ws, is_first, is_final, hs: list=None):
     wait_for()
-    def show_value(value_n_last, T_n_last =2 ,step= 0,lineup = 0, multiple =False, index = 0, isFrist=False ,substep =0,end =False,**kwargs):
+    def show_value(value_n_last, T_n_last =2 ,step= 0,lineup = 0, multiple =False, index = 0, isFrist=False ,substep =0,**kwargs):
         set_property(Action.LINE_UP * lineup)
         show_r = partial(show, space_right=True)
         ### first step
@@ -383,14 +383,11 @@ def compression(ws, is_first, is_final, hs: list=None):
                     show_r(value[idx], "=", final_hash_value_list[idx])
                 elif substep ==2:
                     show_r(value[idx], "=", final_hash_value_list[idx]+ "->" + hex_hash_value_list[idx])
-            if end == True: 
-                show_r("final result: ", digest)
-                pass
 
             # show_r(ws[i])
 
     k_list = initializer(K)  #list
-    
+
     if is_first:
         show_value(8)
         wait_for()
@@ -538,9 +535,6 @@ def compression(ws, is_first, is_final, hs: list=None):
             digest += binToHexa(val)
             hex_hash_value_list.append(binToHexa(val))
         show_value(value_n_last=8,step=2,substep=2,lineup=16)
-        wait_for()
-        show_value(value_n_last=8,step=2,substep=2, end=True,lineup=16)
-        wait_for()
 
         return digest
     return [h0, h1, h2, h3, h4, h5, h6, h7]
@@ -553,7 +547,8 @@ def hash_demo():
     for idx, msg in enumerate(msgs):
         ws = message_scheduler(msg)
         hs = compression(ws, is_first=(idx == 0), is_final=(idx == len(msgs) - 1), hs=hs)
-    return raw_msg
+    print("| Hash value:", hs)
+    return raw_msg, hs
 
         
 if __name__ == "__main__":
@@ -575,9 +570,9 @@ if __name__ == "__main__":
     #     z="00101000000101010111111110101111"
     # )
 
-    input = hash_demo()
-    print(input)
+    input, digest = hash_demo()
+    print("| Input:", input)
     import hashlib
-    print(hashlib.sha256(input.encode('utf-8')).hexdigest())
+    print("| Hash value:", hashlib.sha256(input.encode('utf-8')).hexdigest())
 
    
