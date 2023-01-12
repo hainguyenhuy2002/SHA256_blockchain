@@ -181,15 +181,12 @@ def input_msg():
     msg = input("Input your message: ")
     msg_bytes = [ord(c) for c in msg]
     print      ("Bytes:             ", msg_bytes)
-    msg = "".join([int2bin(i, 8) for i in msg_bytes])
-    print      ("Message:           ", msg)
-    return msg
+    msg_bytes = "".join([int2bin(i, 8) for i in msg_bytes])
+    print      ("Message:           ", msg_bytes)
+    return msg, msg_bytes
 
 
 def padding(msg):
-    wait_for()
-    print("\n\n")
-
     def show_msg(old_bits=None):
         bits = lambda num: f"{num} bits" if num > 1 else f"{num} bit"
         bits_per_line = 64
@@ -214,10 +211,12 @@ def padding(msg):
             else:
                 print("              ", line)
 
-    if len(msg) < 448:    
-        print()
-        show_msg()
+    wait_for()
+    print("\n\n\n")
+    show_msg()        
 
+    if len(msg) < 448: 
+        old_len = len(msg)
         wait_for()
         msg += '1'
         show_msg(old_bits=len(msg) - 1)
@@ -228,13 +227,38 @@ def padding(msg):
         show_msg(old_bits=__len)
 
         wait_for()
-        msg += int2bin(__len - 1, 64)
+        msg += int2bin(old_len, 64)
         show_msg(old_bits=448)
 
     elif len(msg) <= 512:
-        pass
+        old_len = len(msg)
+        wait_for()
+        msg += '1'
+        show_msg(old_bits=len(msg) - 1)
+
+        wait_for()
+        __len = len(msg)
+        msg += '0' * (1024 - 64 - len(msg))
+        show_msg(old_bits=__len)
+
+        wait_for()
+        msg += int2bin(old_len, 64)
+        show_msg(old_bits=1024 - 64)
     else:
-        pass
+        old_len = len(msg)
+        wait_for()
+        msg += '1'
+        show_msg(old_bits=len(msg) - 1)
+
+        wait_for()
+        __len = len(msg)
+        __new_len = math.ceil(__len / 512) * 512 - 64
+        msg += '0' * (__new_len - len(msg))
+        show_msg(old_bits=__len)
+
+        wait_for()
+        msg += int2bin(old_len, 64)
+        show_msg(old_bits=__new_len)
 
     wait_for()
     bits_per_line = 64
@@ -245,7 +269,12 @@ def padding(msg):
             print("\nMessage block:", line)
         else:
             print("              ", line)
-    return msg
+
+    msgs = []
+    chunk_len = 512
+    for i in range(0, len(msg), chunk_len):
+        msgs.append(msg[i : i + chunk_len])
+    return msgs
 
 
 def message_scheduler(msg):
@@ -295,7 +324,7 @@ def message_scheduler(msg):
 
     return ws
 
-def compression(ws):
+def compression(ws, is_first, is_final, hs: list=None):
     wait_for()
     def show_value(value_n_last, T_n_last =2 ,step= 0,lineup = 0, multiple =False, index = 0, isFrist=False ,substep =0,end =False,**kwargs):
         set_property(Action.LINE_UP * lineup)
@@ -360,61 +389,66 @@ def compression(ws):
 
             # show_r(ws[i])
 
-    show_value(8)
-    wait_for()
+    k_list = initializer(K)  #list
+    
+    if is_first:
+        show_value(8)
+        wait_for()
 
-    for i in sqrt_prime:
-        hash_value.append(i)
-    show_value(8,lineup= 11)
-    wait_for()
+        for i in sqrt_prime:
+            hash_value.append(i)
+        show_value(8,lineup= 11)
+        wait_for()
 
-    sqrt_list = []
-    dec_list = []
-    for i in prime_list:
-        a = round(math.sqrt(i), 10)
-        b = round(a - int(a), 10)
-        sqrt_list.append(a)
-        dec_list.append(b)
-    for i in sqrt_list:
-        hash_value.append(i)
-    show_value(8,lineup= 11)
-    wait_for()
+        sqrt_list = []
+        dec_list = []
+        for i in prime_list:
+            a = round(math.sqrt(i), 10)
+            b = round(a - int(a), 10)
+            sqrt_list.append(a)
+            dec_list.append(b)
+        for i in sqrt_list:
+            hash_value.append(i)
+        show_value(8,lineup= 11)
+        wait_for()
 
-    for j in dec_list:
-        hash_value.append(j)
-    show_value(8,lineup= 11)
-    wait_for()
+        for j in dec_list:
+            hash_value.append(j)
+        show_value(8,lineup= 11)
+        wait_for()
 
-    # for k in dec_list:
-    #     hash_value.append(k)
-    show_value(8,lineup= 11 ,multiple=True)
-    wait_for()
+        # for k in dec_list:
+        #     hash_value.append(k)
+        show_value(8,lineup= 11 ,multiple=True)
+        wait_for()
 
-    for i in initializer(h_hex):
-        k = list2str(i) 
-        hash_value.append(k)
-    show_value(8,lineup= 11)
-    wait_for()
+        for i in initializer(h_hex):
+            k = list2str(i) 
+            hash_value.append(k)
+        show_value(8,lineup= 11)
+        wait_for()
 
     #######################
-    k_list =initializer(K)  #list
-    a, b, c, d, e, f, g, h = hash_value[-8:] #string    
-    h0 = str2list(a)  #list
+        a, b, c, d, e, f, g, h = hash_value[-8:] #string  
+        hs = hash_value[-8:] #string  
+        
+    h0 = str2list(hs[0])
+    h1 = str2list(hs[1])
+    h2 = str2list(hs[2])
+    h3 = str2list(hs[3])
+    h4 = str2list(hs[4])
+    h5 = str2list(hs[5])
+    h6 = str2list(hs[6])
+    h7 = str2list(hs[7])
     a = h0
-    h1 = str2list(b)
     b = h1
-    h2 = str2list(c)
     c = h2
-    h3 = str2list(d)
     d = h3
-    h4 = str2list(e)
     e = h4
-    h5 = str2list(f)
     f = h5
-    h6 = str2list(g)
     g = h6
-    h7 = str2list(h)
     h = h7
+
     k_demo = []
     # a0, b0, c0, d0, e0, f0, g0, h0, T1_0, T2_0 = compression_algorithm(a,b,c,d,e,f,g,h,0)
     # list0 = ['',list2str(b0),list2str(c0),list2str(d0),list2str(d0), list2str(f0), list2str(g0),list2str(h0)]
@@ -422,7 +456,7 @@ def compression(ws):
     #     hash_value.append(i)
     
     previous_hash_value_list =  [list2str(a), list2str(b),list2str(c),list2str(d),list2str(e),list2str(f),list2str(g),list2str(h)]
-    for i in range(0,64):
+    for i in range(64):
         k_demo.append(list2str(k_list[i])) 
         #wc
         if i ==0:
@@ -497,46 +531,53 @@ def compression(ws):
     show_value(value_n_last=8,step=2,substep=1,lineup=16)
     wait_for()
 
-    hex_hash_value_list = []
-    digest = '' 
-    for val in [h0, h1, h2, h3, h4, h5, h6, h7]:
-        digest += binToHexa(val)
-        hex_hash_value_list.append(binToHexa(val))
-    show_value(value_n_last=8,step=2,substep=2,lineup=16)
-    wait_for()
-    show_value(value_n_last=8,step=2,substep=2, end=True,lineup=16)
-    wait_for()
+    if is_final:
+        hex_hash_value_list = []
+        digest = ''
+        for val in [h0, h1, h2, h3, h4, h5, h6, h7]:
+            digest += binToHexa(val)
+            hex_hash_value_list.append(binToHexa(val))
+        show_value(value_n_last=8,step=2,substep=2,lineup=16)
+        wait_for()
+        show_value(value_n_last=8,step=2,substep=2, end=True,lineup=16)
+        wait_for()
 
-    return digest
+        return digest
+    return [h0, h1, h2, h3, h4, h5, h6, h7]
         
 
 def hash_demo():
-    msg = input_msg()
-    msg = padding(msg)
-    ws = message_scheduler(msg)
-    wss = compression(ws)
+    raw_msg, msg = input_msg()
+    msgs = padding(msg)
+    hs = None
+    for idx, msg in enumerate(msgs):
+        ws = message_scheduler(msg)
+        hs = compression(ws, is_first=(idx == 0), is_final=(idx == len(msgs) - 1), hs=hs)
+    return raw_msg
 
-
+        
 if __name__ == "__main__":
     # shr_demo(space=6, r=16)
+
     # rotr(space=7, r=4)
+
     #sigma_demo(x = "00000000000000000011111111111111")
+
     # ch_demo(
     #     x="00000000111111110000000011111111",
     #     y="00000000000000001111111111111111",
     #     z="11111111111111110000000000000000"
     # )
+
     # maj(
     #     x="01010000000100101010101000001010",
     #     y="00100010010100010101000010100001",
     #     z="00101000000101010111111110101111"
     # )
 
+    input = hash_demo()
+    print(input)
     import hashlib
-    from hash import sha256
+    print(hashlib.sha256(input.encode('utf-8')).hexdigest())
 
-    hash_demo()
-    print(hashlib.sha256("abc".encode("utf-8")).hexdigest())
-    print(sha256("abc"))
-
-    # print(list2str(ADD(str2list("0110"), str2list("1011"))))
+   
