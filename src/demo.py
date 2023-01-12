@@ -93,13 +93,13 @@ def rotr_demo(x: Union[int, str]="11111111000000001111111100000000", r=32, show_
 def sigma_demo(x: Union[int, str]="00000000000000000011111111111111", r1=7, r2=18, r3=3):
     x = check(x)
 
-    set_space(9)
+    set_space(8)
     show('X', x)
     show("ROTR " + str(r1), x)
     show("ROTR " + str(r2), x, "XOR")
     show("SHR "  + str(r3), x, "XOR")
     show("", "--------------------------------")
-    show("sigma0(x)")
+    show("sigma(x)")
 
     rotr_1  = rotr_demo(x, r=r1, show_first=False, line_up=5)
     rotr_2  = rotr_demo(x, r=r2, show_first=False, line_up=4, postfix="XOR")
@@ -110,7 +110,7 @@ def sigma_demo(x: Union[int, str]="00000000000000000011111111111111", r1=7, r2=1
         res[i] = str(int(rotr_1[i]) ^ int(rotr_2[i]) ^ int(shr_3[i]))
         wait_for()
         set_property(Action.LINE_UP)
-        show("sigma0(x)", "".join(res))
+        show("sigma(x)", "".join(res))
 
 
 def ch_demo(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
@@ -228,7 +228,7 @@ def padding(msg):
         show_msg(old_bits=__len)
 
         wait_for()
-        msg += int2bin(__len, 64)
+        msg += int2bin(__len - 1, 64)
         show_msg(old_bits=448)
 
     elif len(msg) <= 512:
@@ -283,9 +283,9 @@ def message_scheduler(msg):
         wait_for()
         sigma0 = SIGMA(str2list(ws[i - 15]), 7, 18, 3)
         sigma1 = SIGMA(str2list(ws[i - 2]), 17, 19, 10)
-        w = ADD(sigma1, str2list(ws[i-7]))
+        w = ADD(sigma1, str2list(ws[i - 7]))
         w = ADD(w, sigma0)
-        w = ADD(w, str2list(ws[i-16]))
+        w = ADD(w, str2list(ws[i - 16]))
         ws.append(list2str(w))
 
         show_ws(17, line_up=min(17, i), sigma0=list2str(sigma0), sigma1=list2str(sigma1))
@@ -431,10 +431,10 @@ def compression(ws):
         w = str2list(ws[i])   
         S1 = sigma(ROTR(e, 6), ROTR(e, 11), ROTR(e, 25) )
         ch = XOR(AND(e, f), AND(NOT(e), g))
-        T1 = add(add(add(add(h, S1), ch), k_list[i]), w)
+        T1 = ADD(ADD(ADD(ADD(h, S1), ch), k_list[i]), w)
         S0 = sigma(ROTR(a, 2), ROTR(a, 13), ROTR(a, 22))
         m = sigma(AND(a, b), AND(a, c), AND(b, c))
-        T2 = add(S0, m)
+        T2 = ADD(S0, m)
         T_list.append(list2str(T1))
         T_list.append(list2str(T2))
         if i ==0:
@@ -447,11 +447,11 @@ def compression(ws):
         h = g
         g = f
         f = e
-        e = add(d, T1)
+        e = ADD(d, T1)
         d = c
         c = b
         b = a
-        a = add(T1, T2)
+        a = ADD(T1, T2)
         
         list1 = ['                                ',list2str(b),list2str(c),list2str(d),list2str(d), list2str(f), list2str(g),list2str(h)]        
         for j in list1:
@@ -485,14 +485,14 @@ def compression(ws):
     wait_for()
 
 
-    h0 = add(h0, a)
-    h1 = add(h1, b)
-    h2 = add(h2, c)
-    h3 = add(h3, d)
-    h4 = add(h4, e)
-    h5 = add(h5, f)
-    h6 = add(h6, g)
-    h7 = add(h7, h)
+    h0 = ADD(h0, a)
+    h1 = ADD(h1, b)
+    h2 = ADD(h2, c)
+    h3 = ADD(h3, d)
+    h4 = ADD(h4, e)
+    h5 = ADD(h5, f)
+    h6 = ADD(h6, g)
+    h7 = ADD(h7, h)
     final_hash_value_list = [list2str(h0), list2str(h1),list2str(h2),list2str(h3),list2str(h4),list2str(h5),list2str(h6),list2str(h7)]
     show_value(value_n_last=8,step=2,substep=1,lineup=16)
     wait_for()
@@ -531,10 +531,12 @@ if __name__ == "__main__":
     #     y="00100010010100010101000010100001",
     #     z="00101000000101010111111110101111"
     # )
-    # import hashlib
-    # from hash import sha256
-    # print(hashlib.sha256("abc".encode("utf-8")).hexdigest())
-    # print(sha256("abc"))
+
+    import hashlib
+    from hash import sha256
 
     hash_demo()
+    print(hashlib.sha256("abc".encode("utf-8")).hexdigest())
+    print(sha256("abc"))
+
     # print(list2str(ADD(str2list("0110"), str2list("1011"))))

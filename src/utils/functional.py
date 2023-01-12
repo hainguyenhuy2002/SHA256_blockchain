@@ -7,34 +7,21 @@ def sigma(i,j,l):
     return k
 
 
-def add(i, j):
-    length = len(i)
+def ADD(x: list, y: list):
+    length = len(x)
     sums = list(range(length))
     c = 0
-    for x in range(length-1,-1,-1):
-        sums[x] = sigmaa(i[x], j[x], c)
-        c = maj(i[x], j[x], c)
+    for i in range(length-1,-1,-1):
+        sums[i] = sigmaa(x[i], y[i], c)
+        c = maj(x[i], y[i], c)
     return sums
+
 
 def sigmaa(i, j, l):
     return i ^ (j^ l)
 
-def maj(i,j,k): return max([i,j,], key=[i,j,k].count)
 
-def ADD(x: list, y: list):
-    assert len(x) == len(y)
-    sum = []
-    mem = 0
-    for i in range(len(x) - 1, -1, -1):
-        _x, _y = x[i], y[i]
-        s = _x + _y + mem
-        if s > 1:
-            mem = 1
-            s = s % 2
-        else:
-            mem = 0
-        sum.append(s)
-    return sum[::-1]
+def maj(i,j,k): return max([i,j,], key=[i,j,k].count)
 
 
 def NOT(x: list):
