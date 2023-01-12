@@ -1,8 +1,12 @@
+from subprocess import list2cmdline
 from stdio import inputs, wait_for, Action, Symbol, set_property
 from typing import Union
 import math
-from utils.functional import SIGMA, ADD 
 from functools import partial
+from utils.functional import *
+from utils.constants import *
+from utils.process import *
+
 
 
 __space__ = 7
@@ -171,18 +175,20 @@ def maj_demo(x: Union[int, str], y: Union[int, str], z: Union[int, str]):
 
 
 def input_msg():
-    print("| Message:")
+    print("--------------------------------------------------------------------------------")
+    print("Message:")
+    print("--------------------------------------------------------------------------------")
     msg = input("Input your message: ")
     msg_bytes = [ord(c) for c in msg]
     print      ("Bytes:             ", msg_bytes)
     msg = "".join([int2bin(i, 8) for i in msg_bytes])
     print      ("Message:           ", msg)
-    print()
     return msg
 
 
 def padding(msg):
     wait_for()
+    print("\n\n")
 
     def show_msg(old_bits=None):
         bits = lambda num: f"{num} bits" if num > 1 else f"{num} bit"
@@ -195,16 +201,18 @@ def padding(msg):
             __m = f"({bits(old_bits)} -> {bits(len(msg))})"
 
         num_old_lines = math.ceil(old_bits / bits_per_line)
-        set_property(Action.LINE_UP * (num_old_lines + 1))
-        print("| Padding:", __m)
+        set_property(Action.LINE_UP * (num_old_lines + 3))
+        print("--------------------------------------------------------------------------------")
+        print("Padding:", __m)
+        print("--------------------------------------------------------------------------------")
 
         lines = math.ceil(len(msg) / bits_per_line)
         for i in range(lines):
             line = msg[i * bits_per_line : min(len(msg), (i + 1) * bits_per_line)]
             if i == 0:
-                print("Message:        ", line)
+                print("Message:      ", line)
             else:
-                print("                ", line)
+                print("              ", line)
 
     if len(msg) < 448:    
         print()
@@ -234,15 +242,17 @@ def padding(msg):
     for i in range(lines):
         line = msg[i * bits_per_line : min(len(msg), (i + 1) * bits_per_line)]
         if i == 0:
-            print("\n| Message block:", line)
+            print("\nMessage block:", line)
         else:
-            print("                ", line)
+            print("              ", line)
     return msg
 
 
 def message_scheduler(msg):
     wait_for()
-    print("\n| Message scheduler:")
+    print("\n--------------------------------------------------------------------------------")
+    print("Message scheduler:")
+    print("--------------------------------------------------------------------------------")
     set_space(3)
     ws = [msg[i * 32: (i + 1) * 32] for i in range(16)]
 
@@ -285,27 +295,246 @@ def message_scheduler(msg):
 
     return ws
 
+def compression(ws):
+    wait_for()
+    def show_value(value_n_last, T_n_last =2 ,step= 0,lineup = 0, multiple =False, index = 0, isFrist=False ,substep =0,end =False,**kwargs):
+        set_property(Action.LINE_UP * lineup)
+        show_r = partial(show, space_right=True)
+        ### first step
+        if step == 0:
+            print("--------------------------------------------------------------------------------")
+            show_r("Compression: H0 (Initial hash)")
+            print("--------------------------------------------------------------------------------")
+    
+            for idx, v in enumerate(hash_value[-value_n_last:]):
+                if multiple:
+                    show_r(value[idx], "=", v, "* 2 ^ 32")
+                else:
+                    show_r(value[idx], "=", v)
+
+        elif step ==1:
+            print("--------------------------------------------------------------------------------")
+            show_r("Compression: H0 ---> H1")
+            print("--------------------------------------------------------------------------------")
+            show_r(f"W{index}", " =", ws[index], " (message schedule)")
+            show_r(f"K{index}", " =", k_demo[index], " (constant)")
+            print(" ")
+            for idx, v in enumerate( T_list[-T_n_last:]):
+                if idx == 0:
+                    show_r("T1  = Σ1(e) + Ch(e, f, g) + h + ",f"K{index}"," + ",f"W{index}"," = ", v)
+                else:
+                    show_r("T2  = Σ0(a) + Maj(a, b, c) = ", v)
+                    
+            for idx, v in enumerate(hash_value[-value_n_last:]):
+                if isFrist:
+                    show_r(value[idx], "=", v)
+                
+                else:    
+                    if idx %8 == 0:
+                        show_r(value[idx], "=", v,"<- T1 + T2")
+                    elif idx %8 == 4:
+                        show_r(value[idx], "=", v," + T1 ")
+                    else:
+                        show_r(value[idx], "=", v)
+        
+        elif step == 2:
+            print("                                                                                ")   
+            print("                                                                                ")            
+            print("                                                                                ")
+            print("--------------------------------------------------------------------------------")
+            show_r("Compression: H1")
+            print("--------------------------------------------------------------------------------")
+            print("                                                                                ")
+            print("                                                                                ")
+
+            for idx, v in enumerate( value[-value_n_last:]):
+                if substep ==0:
+                    show_r(value[idx], "=", previous_hash_value_list[idx], "+ ", after_hash_value_list[idx])
+                elif substep ==1:
+                    show_r(value[idx], "=", final_hash_value_list[idx])
+                elif substep ==2:
+                    show_r(value[idx], "=", final_hash_value_list[idx]+ "->" + hex_hash_value_list[idx])
+            if end == True: 
+                show_r("final result: ", digest)
+                pass
+
+            # show_r(ws[i])
+
+    show_value(8)
+    wait_for()
+
+    for i in sqrt_prime:
+        hash_value.append(i)
+    show_value(8,lineup= 11)
+    wait_for()
+
+    sqrt_list = []
+    dec_list = []
+    for i in prime_list:
+        a = round(math.sqrt(i), 10)
+        b = round(a - int(a), 10)
+        sqrt_list.append(a)
+        dec_list.append(b)
+    for i in sqrt_list:
+        hash_value.append(i)
+    show_value(8,lineup= 11)
+    wait_for()
+
+    for j in dec_list:
+        hash_value.append(j)
+    show_value(8,lineup= 11)
+    wait_for()
+
+    # for k in dec_list:
+    #     hash_value.append(k)
+    show_value(8,lineup= 11 ,multiple=True)
+    wait_for()
+
+    for i in initializer(h_hex):
+        k = list2str(i) 
+        hash_value.append(k)
+    show_value(8,lineup= 11)
+    wait_for()
+
+    #######################
+    k_list =initializer(K)  #list
+    a, b, c, d, e, f, g, h = hash_value[-8:] #string    
+    h0 = str2list(a)  #list
+    a = h0
+    h1 = str2list(b)
+    b = h1
+    h2 = str2list(c)
+    c = h2
+    h3 = str2list(d)
+    d = h3
+    h4 = str2list(e)
+    e = h4
+    h5 = str2list(f)
+    f = h5
+    h6 = str2list(g)
+    g = h6
+    h7 = str2list(h)
+    h = h7
+    k_demo = []
+    # a0, b0, c0, d0, e0, f0, g0, h0, T1_0, T2_0 = compression_algorithm(a,b,c,d,e,f,g,h,0)
+    # list0 = ['',list2str(b0),list2str(c0),list2str(d0),list2str(d0), list2str(f0), list2str(g0),list2str(h0)]
+    # for i in list0:
+    #     hash_value.append(i)
+    
+    previous_hash_value_list =  [list2str(a), list2str(b),list2str(c),list2str(d),list2str(e),list2str(f),list2str(g),list2str(h)]
+    for i in range(0,64):
+        k_demo.append(list2str(k_list[i])) 
+        #wc
+        if i ==0:
+            show_value(value_n_last=8,step=1,lineup=16,index = i, isFrist=True)
+            wait_for()
+        w = str2list(ws[i])   
+        S1 = sigma(ROTR(e, 6), ROTR(e, 11), ROTR(e, 25) )
+        ch = XOR(AND(e, f), AND(NOT(e), g))
+        T1 = add(add(add(add(h, S1), ch), k_list[i]), w)
+        S0 = sigma(ROTR(a, 2), ROTR(a, 13), ROTR(a, 22))
+        m = sigma(AND(a, b), AND(a, c), AND(b, c))
+        T2 = add(S0, m)
+        T_list.append(list2str(T1))
+        T_list.append(list2str(T2))
+        if i ==0:
+            show_value(value_n_last=8,step=1,lineup=16,index = i, isFrist=True)
+            wait_for()
+        else:
+            show_value(value_n_last=8,step=1,lineup=16,index = i)
+            wait_for()
+
+        h = g
+        g = f
+        f = e
+        e = add(d, T1)
+        d = c
+        c = b
+        b = a
+        a = add(T1, T2)
+        
+        list1 = ['                                ',list2str(b),list2str(c),list2str(d),list2str(d), list2str(f), list2str(g),list2str(h)]        
+        for j in list1:
+            hash_value.append(j)
+        if i ==0:
+            show_value(value_n_last=8,step=1,lineup=16,index = i, isFrist=True)
+            wait_for()
+            show_value(value_n_last=8,step=1,lineup=16,index = i)
+            wait_for()
+        else:
+            show_value(value_n_last=8,step=1,lineup=16,index = i)
+            wait_for()
+
+        
+        list2 = [list2str(a),list2str(b),list2str(c),list2str(d),list2str(d), list2str(f), list2str(g),list2str(h)] 
+        for j in list2:
+            hash_value.append(j)
+        
+        show_value(value_n_last=8,step=1,lineup=16,index = i)
+        wait_for()
+
+        list3 = [list2str(a),list2str(b),list2str(c),list2str(d),list2str(e), list2str(f), list2str(g),list2str(h)] 
+        for j in list3:
+            hash_value.append(j)
+        show_value(value_n_last=8,step=1,lineup=16,index = i)
+        wait_for()
+        #a b c d e f g h
+    after_hash_value_list =  [list2str(a), list2str(b),list2str(c),list2str(d),list2str(e),list2str(f),list2str
+    (g),list2str(h)]
+    show_value(value_n_last=8,step=2,lineup=16)
+    wait_for()
+
+
+    h0 = add(h0, a)
+    h1 = add(h1, b)
+    h2 = add(h2, c)
+    h3 = add(h3, d)
+    h4 = add(h4, e)
+    h5 = add(h5, f)
+    h6 = add(h6, g)
+    h7 = add(h7, h)
+    final_hash_value_list = [list2str(h0), list2str(h1),list2str(h2),list2str(h3),list2str(h4),list2str(h5),list2str(h6),list2str(h7)]
+    show_value(value_n_last=8,step=2,substep=1,lineup=16)
+    wait_for()
+
+    hex_hash_value_list = []
+    digest = '' 
+    for val in [h0, h1, h2, h3, h4, h5, h6, h7]:
+        digest += binToHexa(val)
+        hex_hash_value_list.append(binToHexa(val))
+    show_value(value_n_last=8,step=2,substep=2,lineup=16)
+    wait_for()
+    show_value(value_n_last=8,step=2,substep=2, end=True,lineup=16)
+    wait_for()
+
+    return digest
+        
 
 def hash_demo():
     msg = input_msg()
     msg = padding(msg)
     ws = message_scheduler(msg)
+    wss = compression(ws)
 
 
 if __name__ == "__main__":
-    # shr(space=6, r=16)
+    # shr_demo(space=6, r=16)
     # rotr(space=7, r=4)
-    # sigma0()
-    ch_demo(
-        x="00000000111111110000000011111111",
-        y="00000000000000001111111111111111",
-        z="11111111111111110000000000000000"
-    )
+    #sigma_demo(x = "00000000000000000011111111111111")
+    # ch_demo(
+    #     x="00000000111111110000000011111111",
+    #     y="00000000000000001111111111111111",
+    #     z="11111111111111110000000000000000"
+    # )
     # maj(
     #     x="01010000000100101010101000001010",
     #     y="00100010010100010101000010100001",
     #     z="00101000000101010111111110101111"
     # )
+    # import hashlib
+    # from hash import sha256
+    # print(hashlib.sha256("abc".encode("utf-8")).hexdigest())
+    # print(sha256("abc"))
 
-    # hash_demo()
+    hash_demo()
     # print(list2str(ADD(str2list("0110"), str2list("1011"))))
