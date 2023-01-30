@@ -324,6 +324,7 @@ def message_scheduler(msg):
 
     return ws
 
+
 def compression(ws, is_first, is_final, hs: list=None):
     wait_for()
     def show_value(value_n_last, T_n_last =2 ,step= 0,lineup = 0, multiple =False, index = 0, isFrist=False ,substep =0,**kwargs):
