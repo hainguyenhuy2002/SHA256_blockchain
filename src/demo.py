@@ -328,6 +328,8 @@ def message_scheduler(msg):
 def compression(ws, is_first,num_chunk, is_final, hs: list=None):
     wait_for()
     prev_chunk = num_chunk -1
+    
+    print("\n--------------------------------------------------------------------------------")
 
     def show_value(value_n_last, T_n_last =2 ,step= 0,lineup = 0, multiple =False, index = 0, isFrist=False ,substep =0,num_chunk = num_chunk, prev_chunk = prev_chunk,**kwargs):
         set_property(Action.LINE_UP * lineup)
@@ -395,12 +397,12 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
 
     if is_first:
         show_value(8)
-        wait_for()
 
         for i in sqrt_prime:
             hash_value.append(i)
-        show_value(8,lineup= 11)
         wait_for()
+
+        show_value(8,lineup= 11)
 
         sqrt_list = []
         dec_list = []
@@ -411,16 +413,19 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
             dec_list.append(b)
         for i in sqrt_list:
             hash_value.append(i)
-        show_value(8,lineup= 11)
         wait_for()
+
+        show_value(8,lineup= 11)
 
         for j in dec_list:
             hash_value.append(j)
-        show_value(8,lineup= 11)
         wait_for()
+        show_value(8,lineup= 11)
 
         # for k in dec_list:
         #     hash_value.append(k)
+        wait_for()
+
         show_value(8,lineup= 11 ,multiple=True)
         wait_for()
 
@@ -428,8 +433,6 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
             k = list2str(i) 
             hash_value.append(k)
         show_value(8,lineup= 11)
-        wait_for()
-
     #######################
         a, b, c, d, e, f, g, h = hash_value[-8:] #string  
         hs = hash_value[-8:] #string  
@@ -458,12 +461,17 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
     #     hash_value.append(i)
     
     previous_hash_value_list =  [list2str(a), list2str(b),list2str(c),list2str(d),list2str(e),list2str(f),list2str(g),list2str(h)]
+
+    wait_for()
+    print("\n--------------------------------------------------------------------------------")
+
     for i in range(64):
         k_demo.append(list2str(k_list[i])) 
         #wc
         if i ==0:
-            show_value(value_n_last=8,step=1,lineup=16,index = i, isFrist=True)
             wait_for()
+            print("\n--------------------------------------------------------------------------------")
+            show_value(value_n_last=8,step=1,lineup=16,index = i, isFrist=True)
         w = str2list(ws[i])   
         S1 = sigma(ROTR(e, 6), ROTR(e, 11), ROTR(e, 25) )
         ch = XOR(AND(e, f), AND(NOT(e), g))
@@ -474,11 +482,13 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
         T_list.append(list2str(T1))
         T_list.append(list2str(T2))
         if i ==0:
+            wait_for()
+
             show_value(value_n_last=8,step=1,lineup=16,index = i, isFrist=True)
-            wait_for()
         else:
-            show_value(value_n_last=8,step=1,lineup=16,index = i)
             wait_for()
+
+            show_value(value_n_last=8,step=1,lineup=16,index = i)
 
         h = g
         g = f
@@ -493,32 +503,34 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
         for j in list1:
             hash_value.append(j)
         if i ==0:
+            wait_for() 
             show_value(value_n_last=8,step=1,lineup=16,index = i, isFrist=True)
             wait_for()
             show_value(value_n_last=8,step=1,lineup=16,index = i)
-            wait_for()
         else:
-            show_value(value_n_last=8,step=1,lineup=16,index = i)
             wait_for()
+            show_value(value_n_last=8,step=1,lineup=16,index = i)
 
         
         list2 = [list2str(a),list2str(b),list2str(c),list2str(d),list2str(d), list2str(f), list2str(g),list2str(h)] 
         for j in list2:
             hash_value.append(j)
-        
-        show_value(value_n_last=8,step=1,lineup=16,index = i)
         wait_for()
+
+        show_value(value_n_last=8,step=1,lineup=16,index = i)
 
         list3 = [list2str(a),list2str(b),list2str(c),list2str(d),list2str(e), list2str(f), list2str(g),list2str(h)] 
         for j in list3:
             hash_value.append(j)
-        show_value(value_n_last=8,step=1,lineup=16,index = i)
         wait_for()
+        show_value(value_n_last=8,step=1,lineup=16,index = i)
         #a b c d e f g h
     after_hash_value_list =  [list2str(a), list2str(b),list2str(c),list2str(d),list2str(e),list2str(f),list2str
     (g),list2str(h)]
-    show_value(value_n_last=8,step=2,lineup=16)
     wait_for()
+    print("\n--------------------------------------------------------------------------------")
+    wait_for()
+    show_value(value_n_last=8,step=2,lineup=16)
 
 
     h0 = ADD(h0, a)
@@ -530,8 +542,9 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
     h6 = ADD(h6, g)
     h7 = ADD(h7, h)
     final_hash_value_list = [list2str(h0), list2str(h1),list2str(h2),list2str(h3),list2str(h4),list2str(h5),list2str(h6),list2str(h7)]
-    show_value(value_n_last=8,step=2,substep=1,lineup=16)
     wait_for()
+    
+    show_value(value_n_last=8,step=2,substep=1,lineup=16)
 
     if is_final:
         hex_hash_value_list = []
@@ -539,6 +552,7 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
         for val in [h0, h1, h2, h3, h4, h5, h6, h7]:
             digest += binToHexa(val)
             hex_hash_value_list.append(binToHexa(val))
+        wait_for()
         show_value(value_n_last=8,step=2,substep=2,lineup=16)
 
         return digest
@@ -551,6 +565,8 @@ def hash_demo():
     hs = None
     for idx, msg in enumerate(msgs):
         ws = message_scheduler(msg)
+        wait_for()
+        print("\n--------------------------------------------------------------------------------")
         hs = compression(ws, is_first=(idx == 0),num_chunk= idx+1 ,is_final=(idx == len(msgs) - 1), hs=hs)
     print("| Hash value:", hs)
     return raw_msg, hs
