@@ -372,10 +372,10 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
                         show_r(value[idx], "=", v)
         
         elif step == 2:
-            print("                                                                                                 ")   
-            print
-            ("                                                                                                 ")
-            print("                                                                                                 ")            
+            # print("                                                                                                 ")   
+            # print
+            # ("                                                                                                 ")
+            # print("                                                                                                 ")            
             print("                                                                                                 ")
             print("--------------------------------------------------------------------------------")
             show_r("Compression: " + f"H{num_chunk}")
@@ -565,8 +565,6 @@ def hash_demo():
     hs = None
     for idx, msg in enumerate(msgs):
         ws = message_scheduler(msg)
-        wait_for()
-        print("\n--------------------------------------------------------------------------------")
         hs = compression(ws, is_first=(idx == 0),num_chunk= idx+1 ,is_final=(idx == len(msgs) - 1), hs=hs)
     print("| Hash value:", hs)
     return raw_msg, hs
