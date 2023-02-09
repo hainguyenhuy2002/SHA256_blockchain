@@ -348,7 +348,7 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
 
         elif step ==1:
             print("--------------------------------------------------------------------------------")
-            show_r("Compression:"+ f"H{prev_chunk}" +"--->"+ f"H{num_chunk}")
+            show_r("Compression: "+ f"H{prev_chunk}" +"--->"+ f"H{num_chunk}")
             print("--------------------------------------------------------------------------------")
             show_r(f"W{index}", " =", ws[index], " (message schedule)")
             show_r(f"K{index}", " =", k_demo[index], " (constant)")
@@ -436,6 +436,8 @@ def compression(ws, is_first,num_chunk, is_final, hs: list=None):
     #######################
         a, b, c, d, e, f, g, h = hash_value[-8:] #string  
         hs = hash_value[-8:] #string  
+    else:
+        print("\n" * 10)
         
     h0 = str2list(hs[0])
     h1 = str2list(hs[1])
@@ -566,32 +568,42 @@ def hash_demo():
     for idx, msg in enumerate(msgs):
         ws = message_scheduler(msg)
         hs = compression(ws, is_first=(idx == 0),num_chunk= idx+1 ,is_final=(idx == len(msgs) - 1), hs=hs)
+
+    up = 5
+    print((" " * 50 + "\n") * up + Action.LINE_UP * up)
     print("| Hash value:", hs)
-    return raw_msg, hs
+    print("| Input:", raw_msg)
+    import hashlib
+    print("| Hash value:", hashlib.sha256(raw_msg.encode('utf-8')).hexdigest())
 
         
 if __name__ == "__main__":
-    # shr_demo(space=6, r=16)
+    from argparse import ArgumentParser
 
-    # rotr(space=7, r=4)
+    parser = ArgumentParser()
+    parser.add_argument("-f", "--func", required=True)
+    args = parser.parse_args()
 
-    #sigma_demo(x = "00000000000000000011111111111111")
+    funcs = {  
+        "shr": lambda: shr_demo(space=6, r=16),
+        "rotr": lambda: rotr_demo(space=8, r=17),
+        "sigma": sigma_demo,
+        "ch": lambda: ch_demo(
+            x="00000000111111110000000011111111",
+            y="00000000000000001111111111111111",
+            z="11111111111111110000000000000000"
+        ),
+        "maj": lambda: maj_demo(
+            x="01010000000100101010101000001010",
+            y="00100010010100010101000010100001",
+            z="00101000000101010111111110101111"
+        ),
+        "sha256": hash_demo
+    }
 
-    # ch_demo(
-    #     x="00000000111111110000000011111111",
-    #     y="00000000000000001111111111111111",
-    #     z="11111111111111110000000000000000"
-    # )
+    if args.func in funcs:
+        funcs[args.func]()
 
-    # maj(
-    #     x="01010000000100101010101000001010",
-    #     y="00100010010100010101000010100001",
-    #     z="00101000000101010111111110101111"
-    # )
-
-    input, digest = hash_demo()
-    print("| Input:", input)
-    import hashlib
-    print("| Hash value:", hashlib.sha256(input.encode('utf-8')).hexdigest())
+    
 
    
